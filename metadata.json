@@ -1,6 +1,6 @@
 {
-  "name": "The Executive Affiliate",
-  "description": "High-end affiliate management dashboard with AI-powered copywriting and technical integration tools.",
-  "requestFramePermissions": [],
+  "name": "Nexus Affiliates",
+  "description": "Intelligent agent orchestration for affiliate marketing. Mineração, estratégia e criação automatizada.",
+  "requestFramePermissions": ["geolocation"],
   "majorCapabilities": []
 }

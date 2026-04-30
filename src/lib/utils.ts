@@ -145,7 +145,8 @@ export const MOCK_CREATIVES = [
     type: 'Instagram Reel',
     image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=400&h=600&auto=format&fit=crop',
     status: 'Ready',
-    agent: 'Visual Designer'
+    agent: 'Visual Designer',
+    isVideo: true
   },
   {
     id: 'c2',
@@ -153,7 +154,8 @@ export const MOCK_CREATIVES = [
     type: 'TikTok Ad',
     image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=400&h=600&auto=format&fit=crop',
     status: 'Generated',
-    agent: 'Visual Designer'
+    agent: 'Visual Designer',
+    isVideo: true
   },
   {
     id: 'c3',
@@ -161,6 +163,16 @@ export const MOCK_CREATIVES = [
     type: 'LinkedIn Carousel',
     image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=400&h=600&auto=format&fit=crop',
     status: 'In Review',
-    agent: 'Visual Designer'
+    agent: 'Visual Designer',
+    isVideo: false
+  },
+  {
+    id: 'c4',
+    title: 'Unboxing Premium Watch',
+    type: 'YouTube Short',
+    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=400&h=600&auto=format&fit=crop',
+    status: 'Ready',
+    agent: 'Chief of Staff',
+    isVideo: true
   }
 ];
