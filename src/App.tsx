@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSquad } from './context/SquadContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Users, 
@@ -47,7 +48,8 @@ import {
   Globe,
   X,
   Video,
-  Clapperboard
+  Clapperboard,
+  Fingerprint
 } from 'lucide-react';
 import { cn, MOCK_PRODUCTS, MOCK_STATS, MOCK_TRENDS, MOCK_AGENTS, MOCK_CREATIVES, MOCK_NOTIFICATIONS } from './lib/utils';
 import { 
@@ -363,8 +365,8 @@ const ApprovedPosts = ({ approvedItems, onReview, onPublish }: {
               <div key={item.id || i} className="bg-surface-container-lowest p-8 rounded-[2.5rem] border border-black/5 shadow-sm relative overflow-hidden group">
                 {isPublished && (
                   <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-20 flex items-center justify-center animate-in fade-in duration-500">
-                    <div className="bg-green-500 text-white px-8 py-4 rounded-3xl shadow-xl font-headline font-black text-lg flex items-center gap-3 animate-bounce">
-                      <CheckCircle2 className="w-6 h-6" /> PUBLICADO!
+                    <div className="bg-primary text-white px-8 py-4 rounded-3xl shadow-xl font-headline font-black text-lg flex items-center gap-3 animate-bounce">
+                      <Download className="w-6 h-6" /> EXPORTADO!
                     </div>
                   </div>
                 )}
@@ -426,12 +428,12 @@ const ApprovedPosts = ({ approvedItems, onReview, onPublish }: {
                     {isPublishing ? (
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                        SINCRONIZANDO...
+                        PREPARANDO ARQUIVOS...
                       </div>
                     ) : (
                       <>
-                        <TrendingUp className="w-4 h-4" />
-                        Aprovar & Publicar
+                        <Download className="w-4 h-4" />
+                        Exportar Campanha
                       </>
                     )}
                   </button>
@@ -455,18 +457,47 @@ const NexusAssistant = ({ onNavigate }: { onNavigate: (view: View) => void }) =>
   const [step, setStep] = useState<'invite' | 'scout' | 'strategist' | 'creative' | 'seo' | 'final'>('invite');
   const [niche, setNiche] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [scoutedItems, setScoutedItems] = useState<any[]>([]);
+  const [strategyData, setStrategyData] = useState<any>(null);
+  const [creativeData, setCreativeData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const { scoutProducts, generateStrategy, generateCreative } = useSquad();
 
-  const nextStepMap = {
-    'invite': 'scout',
-    'scout': 'strategist',
-    'strategist': 'creative',
-    'creative': 'seo',
-    'seo': 'final',
-    'final': 'invite'
-  };
-
-  const handleNext = () => {
-    setStep(nextStepMap[step] as any);
+  const handleNext = async () => {
+    if (step === 'invite') {
+      setLoading(true);
+      try {
+        const results = await scoutProducts(niche);
+        setScoutedItems(results);
+        setStep('scout');
+      } catch (e) {
+        console.error(e);
+        alert('Erro ao invocar o Scout');
+      }
+      setLoading(false);
+    } else if (step === 'scout' && selectedProduct) {
+      setLoading(true);
+      try {
+        const strat = await generateStrategy(selectedProduct);
+        setStrategyData(strat);
+        setStep('strategist');
+      } catch(e) { alert("Erro ao gerar estratégia"); }
+      setLoading(false);
+    } else if (step === 'strategist' && selectedProduct && strategyData) {
+      setLoading(true);
+      try {
+        const creat = await generateCreative(selectedProduct, strategyData);
+        setCreativeData(creat);
+        setStep('creative');
+      } catch(e) { alert("Erro ao gerar criativo"); }
+      setLoading(false);
+    } else if (step === 'creative') {
+      setStep('seo');
+    } else if (step === 'seo') {
+      setStep('final');
+    } else if (step === 'final') {
+      setStep('invite');
+    }
   };
 
   const finalSummary = `
@@ -527,9 +558,10 @@ Tags: ${selectedProduct?.name === 'Mixer Portátil Pro' ? '#mixerportatil #cozin
                 />
                 <button 
                   onClick={handleNext}
-                  className="w-full sm:w-auto bg-primary text-white px-12 py-5 rounded-2xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3"
+                  disabled={loading}
+                  className="w-full sm:w-auto bg-primary text-white px-12 py-5 rounded-2xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50"
                 >
-                  MINERAR <Zap className="w-6 h-6" />
+                  {loading ? 'MINERANDO...' : 'MINERAR'} <Zap className="w-6 h-6" />
                 </button>
               </div>
             </motion.div>
@@ -569,67 +601,31 @@ Tags: ${selectedProduct?.name === 'Mixer Portátil Pro' ? '#mixerportatil #cozin
                     </tr>
                   </thead>
                   <tbody className="text-sm">
-                    {(niche.toLowerCase().includes('cozinha') || niche.toLowerCase().includes('mixer')) ? (
-                      [
-                        { name: 'Mixer Portátil Pro', platform: 'Hotmart', commission: '40%', reason: 'Alta conversão em anúncios de rotina' },
-                        { name: 'Fritadeira Air-Ultra', platform: 'Amazon', commission: '10%', reason: 'Nicho lifestyle saudável' },
-                        { name: 'Conjunto de Facas Chef', platform: 'Amazon', commission: '12%', reason: 'Público apaixonado por culinária' }
-                      ].map((p, i) => (
+                    {scoutedItems.map((p, i) => (
                         <tr 
                           key={i} 
                           onClick={() => setSelectedProduct(p)}
                           className={cn(
                             "border-b border-white/5 transition-all cursor-pointer group relative",
-                            selectedProduct?.name === p.name ? "bg-primary/20 scale-[1.01] z-10" : "hover:bg-white/10"
+                            selectedProduct?.title === p.title ? "bg-primary/20 scale-[1.01] z-10" : "hover:bg-white/10"
                           )}
                         >
                           <td className="py-6 px-8 font-black text-lg group-hover:text-primary transition-colors flex items-center gap-3">
-                            {selectedProduct?.name === p.name && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
-                            {p.name}
+                            {selectedProduct?.title === p.title && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
+                            {p.title}
                           </td>
                           <td className="py-6 px-4"><span className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black">{p.platform}</span></td>
                           <td className="py-6 px-4 font-black text-amber-500 text-lg">{p.commission}</td>
                           <td className="py-6 px-8 text-white/50 italic leading-relaxed">
                             {p.reason}
-                            {selectedProduct?.name === p.name && (
+                            {selectedProduct?.title === p.title && (
                               <div className="absolute right-8 top-1/2 -translate-y-1/2 bg-primary text-white text-[9px] font-black px-2 py-1 rounded-lg animate-in fade-in slide-in-from-right-2">
                                 SELECIONADO
                               </div>
                             )}
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      [
-                        { name: 'Câmera Retrô 4K', platform: 'Amazon', commission: '8%', reason: 'Trending no TikTok UK / Gap no BR' },
-                        { name: 'Mixer Portátil Pro', platform: 'Hotmart', commission: '40%', reason: 'Alta conversão em anúncios de rotina' },
-                        { name: 'Planner Executivo 2026', platform: 'Braip', commission: '50%', reason: 'Nicho organizacional em escala' }
-                      ].map((p, i) => (
-                        <tr 
-                          key={i} 
-                          onClick={() => setSelectedProduct(p)}
-                          className={cn(
-                            "border-b border-white/5 transition-all cursor-pointer group relative",
-                            selectedProduct?.name === p.name ? "bg-primary/20 scale-[1.01] z-10" : "hover:bg-white/10"
-                          )}
-                        >
-                          <td className="py-6 px-8 font-black text-lg group-hover:text-primary transition-colors flex items-center gap-3">
-                            {selectedProduct?.name === p.name && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
-                            {p.name}
-                          </td>
-                          <td className="py-6 px-4"><span className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black">{p.platform}</span></td>
-                          <td className="py-6 px-4 font-black text-amber-500 text-lg">{p.commission}</td>
-                          <td className="py-6 px-8 text-white/50 italic leading-relaxed">
-                            {p.reason}
-                            {selectedProduct?.name === p.name && (
-                              <div className="absolute right-8 top-1/2 -translate-y-1/2 bg-primary text-white text-[9px] font-black px-2 py-1 rounded-lg animate-in fade-in slide-in-from-right-2">
-                                SELECIONADO
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -692,50 +688,70 @@ Tags: ${selectedProduct?.name === 'Mixer Portátil Pro' ? '#mixerportatil #cozin
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white/5 p-10 rounded-[2.5rem] border border-white/10 text-left">
-                  <h4 className="text-primary font-black text-[12px] uppercase tracking-widest mb-6 px-4 py-1 bg-primary/10 w-fit rounded-full">Público-Alvo</h4>
-                  <div className="space-y-6">
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                      <strong className="text-white block text-lg mb-2">😫 Dores</strong>
-                      <p className="text-white/60 text-sm leading-relaxed">Sente que as fotos digitais não têm personalidade e quer algo tangível.</p>
+              <div className="space-y-8">
+                {strategyData?.businessDna && (
+                  <div className="bg-gradient-to-br from-primary/10 to-transparent p-10 rounded-[2.5rem] border border-primary/20 text-left relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-10">
+                      <Fingerprint className="w-32 h-32 text-primary" />
                     </div>
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                      <strong className="text-white block text-lg mb-2">✨ Desejos</strong>
-                      <p className="text-white/60 text-sm leading-relaxed">Busca status através da estética "Vintage/Retro" e exclusividade visual.</p>
+                    <h4 className="text-primary font-black text-[12px] uppercase tracking-widest mb-6 px-4 py-1 bg-primary/10 w-fit rounded-full flex items-center gap-2">
+                      <Fingerprint className="w-4 h-4" /> Business DNA (Pomelli Engine)
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                      <div>
+                        <strong className="text-white block text-sm mb-1 uppercase tracking-widest text-primary/80">Voz da Marca</strong>
+                        <p className="text-white/80 font-medium">{strategyData.businessDna.brandVoice}</p>
+                      </div>
+                      <div>
+                        <strong className="text-white block text-sm mb-1 uppercase tracking-widest text-primary/80">Valores Essenciais</strong>
+                        <p className="text-white/80 font-medium">{strategyData.businessDna.coreValues}</p>
+                      </div>
+                      <div>
+                        <strong className="text-white block text-sm mb-1 uppercase tracking-widest text-primary/80">Proposta Única (USP)</strong>
+                        <p className="text-white/80 font-medium">{strategyData.businessDna.uniqueSellingProposition}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="bg-white/5 p-10 rounded-[2.5rem] border border-white/10 text-left">
+                    <h4 className="text-primary font-black text-[12px] uppercase tracking-widest mb-6 px-4 py-1 bg-primary/10 w-fit rounded-full">Público-Alvo</h4>
+                    <div className="space-y-6">
+                      <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <strong className="text-white block text-lg mb-2">😫 Dores</strong>
+                        <p className="text-white/60 text-sm leading-relaxed">{strategyData?.painPoints || "Sente que as fotos digitais não têm personalidade e quer algo tangível."}</p>
+                      </div>
+                      <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <strong className="text-white block text-lg mb-2">✨ Desejos</strong>
+                        <p className="text-white/60 text-sm leading-relaxed">{strategyData?.desires || "Busca status através da estética Vintage/Retro e exclusividade visual."}</p>
+                      </div>
+                    </div>
+                  </div>
                 <div className="bg-white/5 p-10 rounded-[2.5rem] border border-white/10 text-left">
                   <h4 className="text-secondary font-black text-[12px] uppercase tracking-widest mb-6 px-4 py-1 bg-secondary/10 w-fit rounded-full">Canais Estratégicos</h4>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 group hover:bg-white/10 transition-all cursor-default">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
-                          <MessageSquare className="w-6 h-6 text-white" />
+                    {(strategyData?.channels || [
+                      { name: "TikTok (Organic)", format: "Vídeo Curto / Trend", match: "95%" },
+                      { name: "Instagram (Reels)", format: "Aesthetic / Lifestyle", match: "89%" }
+                    ]).map((channel: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 group hover:bg-white/10 transition-all cursor-default">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
+                            {channel.name.toLowerCase().includes('tiktok') ? <MessageSquare className="w-6 h-6 text-white" /> : <ImageIcon className="w-6 h-6 text-white" />}
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-white">{channel.name}</p>
+                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">{channel.format}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-black text-white">TikTok (Organic)</p>
-                          <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Vídeo Curto / Trend</p>
-                        </div>
+                        <span className="text-xs font-black text-green-400">{channel.match} MATCH</span>
                       </div>
-                      <span className="text-xs font-black text-green-400">95% MATCH</span>
-                    </div>
-                    <div className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 group hover:bg-white/10 transition-all cursor-default">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-yellow-400 via-purple-600 to-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <ImageIcon className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-black text-white">Instagram (Reels)</p>
-                          <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Aesthetic / Lifestyle</p>
-                        </div>
-                      </div>
-                      <span className="text-xs font-black text-green-400">89% MATCH</span>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>
+            </div>
 
               <div className="bg-white/5 p-8 rounded-3xl border border-white/10 text-left">
                 <h4 className="text-white font-black text-xs uppercase tracking-widest mb-6 flex items-center gap-2">
@@ -764,6 +780,12 @@ Tags: ${selectedProduct?.name === 'Mixer Portátil Pro' ? '#mixerportatil #cozin
                 <div>
                   <h3 className="text-3xl font-black text-white font-headline leading-tight">✍️ AGENTE CREATIVE</h3>
                   <p className="text-white/50 text-sm font-bold uppercase tracking-widest mt-1">Geração de Copy para {selectedProduct?.name || 'seu produto'}</p>
+                  {creativeData?.campaignName && (
+                    <div className="mt-4 px-4 py-1.5 bg-primary/20 border border-primary/30 rounded-full inline-flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <span className="text-xs font-black text-primary uppercase tracking-widest">Campanha: {creativeData.campaignName}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -773,20 +795,8 @@ Tags: ${selectedProduct?.name === 'Mixer Portátil Pro' ? '#mixerportatil #cozin
                     <span className="w-2 h-2 bg-primary rounded-full"></span> Legenda de Alta Conversão (Modelo AIDA)
                   </label>
                   <div className="bg-white/5 p-8 rounded-[2.5rem] border border-white/10 relative group hover:border-primary/30 transition-all">
-                    <p className="text-white/80 text-lg leading-relaxed font-medium italic">
-                      {selectedProduct?.name === 'Mixer Portátil Pro' ? (
-                        <>
-                          "Cansado de mixers fracos que não aguentam nada? 🌪️ <br/><br/>
-                          Conheça a potência que cabe na sua bolsa. O Mixer Portátil Pro foi feito para quem não abre mão da praticidade, seja na academia ou no escritório. 💪 <br/><br/>
-                          Pegue o seu com desconto exclusivo no link da bio! ✨ #mixerportatil #cozinha #fitness"
-                        </>
-                      ) : (
-                        <>
-                          "Você já sentiu que suas fotos digitais estão perdendo a alma? 📸 <br/><br/>
-                          Pare de acumular arquivos e comece a colecionar momentos reais. A {selectedProduct?.name || 'Câmera Retrô 4K'} une a nostalgia do filme com a tecnologia que você precisa hoje. ✨ <br/><br/>
-                          Últimas unidades com o link de desconto na bio! ⏳ #retro #aesthetic"
-                        </>
-                      )}
+                    <p className="text-white/80 text-lg leading-relaxed font-medium italic whitespace-pre-wrap">
+                      {creativeData?.copy || "Copy gerada pelo Agente Criativo aparecerá aqui..."}
                     </p>
                     <button className="absolute top-6 right-6 p-3 bg-white/10 rounded-xl hover:bg-primary transition-colors hover:scale-110 active:scale-95">
                       <Copy className="w-5 h-5 text-white" />
@@ -800,10 +810,7 @@ Tags: ${selectedProduct?.name === 'Mixer Portátil Pro' ? '#mixerportatil #cozin
                   </label>
                   <div className="bg-slate-900/50 p-6 rounded-2xl border border-white/10 font-mono text-sm text-slate-300 leading-relaxed">
                     <code>
-                      {selectedProduct?.name === 'Mixer Portátil Pro' 
-                        ? `cinematic unboxing of a sleek portable mixer, juice swirling inside, kitchen aesthetic, bright morning light, 4k, minimalist design --ar 9:16`
-                        : `cinematic shot of a vintage digital camera on a wooden table, warm golden hour sunlight, soft bokeh background, 4k, hyper-realistic, instagram aesthetic, high quality design --ar 9:16`
-                      }
+                      {creativeData?.prompt || "Prompt visual gerado pelo Agente aparecerá aqui..."}
                     </code>
                   </div>
                 </div>
@@ -2295,11 +2302,10 @@ const SettingsView = () => {
 // --- Main App ---
 
 export default function App() {
+  const { products, approvedItems: approvedProducts, approveProduct: contextApproveProduct, publishProduct } = useSquad();
   const [currentView, setCurrentView] = useState<View>('analytics');
   const [creatives, setCreatives] = useState(MOCK_CREATIVES);
   const [generatedLinks, setGeneratedLinks] = useState<{id: string, url: string, target: string, clicks: number}[]>([]);
-  const [approvedProducts, setApprovedProducts] = useState<any[]>([]);
-  const [products, setProducts] = useState(MOCK_PRODUCTS);
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
 
   const addNotification = (message: string, type: 'gold' | 'spy' | 'optimizer') => {
@@ -2332,21 +2338,10 @@ export default function App() {
   };
 
   // Function to approve a product (from Radar Nexus)
-  const approveProduct = (id: string) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, status: 'approved' } : p));
+  const approveProduct = async (id: string) => {
+    await contextApproveProduct(id);
     const product = products.find(p => p.id === id);
-    if (product && !approvedProducts.find(ap => ap.id === product.id)) {
-      // Create a "creative" based on the product
-      const newCreative = {
-        id: `c-${product.id}`,
-        title: product.title,
-        type: 'Product Ad',
-        image: product.image,
-        status: 'Approved',
-        agent: 'Nexus Radar',
-        isVideo: true
-      };
-      setApprovedProducts(prev => [newCreative, ...prev]);
+    if (product) {
       addNotification(`Produto "${product.title}" aprovado no Radar!`, 'spy');
       alert(`${product.title} aprovado e enviado para a Fila de Publicação!`);
     }
@@ -2446,7 +2441,7 @@ export default function App() {
               {currentView === 'approved' && (
                 <ApprovedPosts 
                   approvedItems={approvedProducts} 
-                  onPublish={(title) => addNotification(`Campanha "${title}" ativada no TikTok e Google Ads!`, 'gold')}
+                  onPublish={(title) => addNotification(`Arquivos da campanha "${title}" preparados para download!`, 'gold')}
                   onReview={(item) => {
                     // Navigate back to studio and perhaps remove from approved list to redo the flow
                     setApprovedProducts(prev => prev.filter(p => p.id !== item.id));

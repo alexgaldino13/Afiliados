@@ -2,9 +2,12 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import { SquadProvider } from './context/SquadContext.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <SquadProvider>
+      <App />
+    </SquadProvider>
   </StrictMode>,
 );
