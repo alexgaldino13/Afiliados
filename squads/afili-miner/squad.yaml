@@ -1,0 +1,38 @@
+name: afili-miner
+displayName: Afili Miner — Garimpo de Oportunidades
+description: Pipeline sequencial para garimpar produtos afiliados no Brasil, pontuar oportunidades, extrair DNA de vendas (Pomelli), montar campanha e exportar card para LALAFILIADOS.
+version: "1.0.0"
+skills:
+  - web_search
+  - web_fetch
+data:
+  - pipeline/data/research-brief.md
+  - pipeline/data/domain-framework.md
+  - pipeline/data/quality-criteria.md
+  - pipeline/data/output-examples.md
+  - pipeline/data/anti-patterns.md
+  - pipeline/data/tone-of-voice.md
+pipeline:
+  steps:
+    - id: garimpar_produtos
+      title: Garimpar os 5 melhores produtos do momento
+      file: pipeline/steps/step-01-garimpar-produtos.md
+    - id: analisar_oportunidades
+      title: Pontuar e ranquear oportunidades
+      file: pipeline/steps/step-02-analisar-oportunidades.md
+    - id: checkpoint_aprovacao
+      title: Aprovação do top 3 pelo usuário
+      file: pipeline/steps/step-03-checkpoint-aprovacao.md
+    - id: extrair_dna_pomelli
+      title: Extrair DNA completo da página de vendas
+      file: pipeline/steps/step-04-extrair-dna-pomelli.md
+    - id: briefing_campanha
+      title: Montar briefing de campanha
+      file: pipeline/steps/step-05-briefing-campanha.md
+    - id: card_lalafiliados
+      title: Consolidar card para LALAFILIADOS
+      file: pipeline/steps/step-06-card-lalafiliados.md
+  checkpoints:
+    - id: checkpoint_aprovacao
+      title: Aprovar produto do top 3 antes de continuar
+      file: pipeline/steps/step-03-checkpoint-aprovacao.md

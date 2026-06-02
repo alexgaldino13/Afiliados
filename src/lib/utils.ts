@@ -135,6 +135,14 @@ export const MOCK_AGENTS = [
     goal: 'Analisar posts passados e priorizar produtos similares aos que geraram mais cliques e lucro.',
     backstory: 'Cientista de dados focado em loops de feedback positivo e maximização de ROI por nicho.',
     avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=200&h=200&auto=format&fit=crop'
+  },
+  {
+    id: 'media-buyer',
+    name: 'Media Buyer',
+    role: 'Estrategista de Tráfego',
+    goal: 'Criar planos de mídia otimizados para ROI, definindo orçamentos e segmentações.',
+    backstory: 'Ex-gestor de contas em grandes agências, especialista em arbitragem de tráfego pago.',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&h=200&auto=format&fit=crop'
   }
 ];
 

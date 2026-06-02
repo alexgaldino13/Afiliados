@@ -1,58 +1,73 @@
-# Nexus OpenSquad - Documentação Viva do Projeto
+# LALAFILIADOS - Documentação Viva do Projeto
 
 Este documento centraliza todas as intenções, ideias, o progresso realizado e o roadmap futuro do projeto. Ele serve como o cérebro do produto para o desenvolvedor e para a Inteligência Artificial.
 
 ## 🎯 Visão do Produto
-O Nexus OpenSquad é uma máquina autônoma de curadoria e criação de conteúdo para Afiliados e Profissionais de Marketing. O objetivo é remover o trabalho braçal (mineração de ofertas, criação de copy, design) e focar na **Estratégia e Escala**. 
+O LALAFILIADOS é uma máquina autônoma de curadoria e criação de conteúdo para Afiliados e Profissionais de Marketing. O objetivo é remover o trabalho braçal (mineração de ofertas, criação de copy, design) e focar na **Estratégia e Escala**. 
 
 **Como funciona a jornada ideal?**
-1. O sistema minera produtos em alta nas plataformas (Hotmart, Amazon, TikTok Shop) automaticamente.
-2. O usuário revisa e aprova as oportunidades no **Radar Nexus**.
-3. O Esquadrão de IA (*Strategist* e *Creative*) entra em ação:
-   - Extrai o **Business DNA** da oferta (Voz da marca, Dores, Desejos).
-   - Cria Campanhas Completas (Copys AIDA de alta conversão, Prompts Visuais para Midjourney/Flux).
-4. O usuário aprova e os arquivos vão para a Fila de Publicação.
-5. (Fase 2) O sistema orquestra e publica essas campanhas nas redes sociais ou sobe anúncios via Agente *Media Buyer*.
+1. O sistema minera produtos em alta nas plataformas automaticamente ou aceita um link direto (Amazon/YouTube).
+2. A **Pomelli Engine** disseca o Business DNA do produto instantaneamente.
+3. O Esquadrão de IA (*Strategist* e *Creative*) orquestra a campanha multimodal (Imagem, Vídeo, Áudio, Copy).
+4. O usuário aprova, agenda o lançamento ou exporta o pacote completo para subir nos canais (Ads/Orgânico).
 
 ---
 
 ## ✅ O que já foi feito (Concluído)
 
-- **Setup Full-Stack (Fase 1):**
-  - Transformamos o protótipo visual estático gerado pelo AI Studio em uma aplicação Vite + React.
-  - Implementamos um **Backend Node/Express** (porta 3001) para servir de motor da IA.
-  - Configuramos o `concurrently` para rodar front e back juntos com `npm run dev`.
+- **Setup Full-Stack & Segurança (Fase 1 e 2):**
+  - Vite + React + Supabase Auth & Database (Cloud).
+  - Backend Node/Express como motor de orquestração.
+  - Sincronização em tempo real (Real-time updates) via PostgreSQL listeners.
 
-- **Integração do Motor de IA (Gemini):**
-  - O backend agora utiliza o `@google/genai` (modelo `gemini-2.5-flash`).
-  - Agente **Scout**: Criado endpoint para minerar dados de produtos baseados em nichos.
-  - Agente **Strategist**: Modificado com a arquitetura "Pomelli Engine" para identificar o *Business DNA* (Brand Voice, Valores Essenciais, USP) e o público-alvo.
-  - Agente **Creative**: Utiliza o *Business DNA* para gerar legendas perfeitas e prompts gerativos.
+- **Expansão Multimodal & Criativa (Fase 1.5):**
+  - Geração automática de Imagem, Vídeo (5s) e Trilha Sonora.
+  - **Pomelli Engine (Google Labs)**: Integração da lógica de extração de DNA (Brand Voice, USP, Market Gap).
+  - **Fila de Lançamento Pro**: Sistema de agendamento e status de campanhas.
+  - **Exportação Real**: Funcionalidade de download em ZIP real com todos os ativos e briefing.
 
-- **Refatoração do Front-end (Context API):**
-  - O estado centralizado vive agora em `SquadContext.tsx`.
-  - A interface em `App.tsx` não usa mais dados estáticos para a Inteligência Artificial; os agentes alimentam a UI em tempo real.
+- **Inteligência de Mercado & Dados:**
+  - **Google Trends Integration**: Widget na dashboard mostrando termos em ascensão no nicho.
+  - **Google Ads Engine**: Geração automática de Palavras-Chave (SEO/Ads), Títulos (30 caracteres) e Descrições.
+  - **Amazon Auto-Tagging**: Integração com Associate ID (`galdino1307-20`) para geração de links automáticos.
 
-- **Automação Diária (Scout Autônomo):**
-  - Implementada uma rotina em background no backend (CRON-like com `setInterval`) que varre as plataformas a cada 4 horas e salva os resultados no banco de dados local (`server/data.json`).
-  - Um endpoint `/api/force-scout` permite testar essa rotina manualmente.
+- **Expansão de Conhecimento (Lala Academy):**
+  - Criada a base de conhecimento proprietária onde o usuário injeta transcrições de cursos e frameworks próprios.
 
-- **Fila de Publicação (Export Mode):**
-  - Adaptada para a Fase 1: os botões permitem "Exportar a Campanha" gerada.
+- **Interoperabilidade:**
+  - **Bridge Roteirista**: Botão de exportação de briefing otimizado para o projeto "Roteirista".
+
+- **Infraestrutura e Conectividade (Estabilidade Pro):**
+  - **Conexão Universal**: Backend configurado para aceitar requisições de qualquer IP na rede local (Porta 3001).
+  - **Pipeline Assíncrona**: O sistema agora cria o card da campanha instantaneamente (status 'draft') enquanto a IA processa mídias pesadas em background.
+  - **Supabase Storage**: Integração total com Buckets para armazenamento permanente de mídias (evitando links expirados).
+  - **Redundância IA (OpenRouter)**: Implementado sistema multimodelo com Claude 3.5 Sonnet (Copy) e GPT-4o (Estratégia).
+  - **UI Blindada**: Proteção total contra "Telas em Branco" através de renderização defensiva.
+
+---
+
+## 🚀 Próximos Passos (Roadmap)
+
+- **Fase 3: Automação Social Real**
+  - Conexão oficial com APIs de redes sociais para postagem direta.
+  - Webhooks para registro de conversões reais (Hotmart/Kiwify).
+
+- **Fase 4: Escala e IA Buyer Real**
+  - Integração com Meta Ads API para subir conjuntos de anúncios automaticamente.
+  - O Agente **Media Buyer** passará a gerir o orçamento baseado no ROAS real do Tracker.
+
+- **Refinamento de Onboarding:**
+  - Onboarding 100% guiado por IA (concluído a lógica inicial).
 
 ---
 
 ## 🚀 O que está para fazer (Roadmap)
 
-### Fase 1.5: Polimento Visual
-- [ ] Integrar geradores reais de imagem via API (ex: FLUX via fal.ai ou OpenAI) na resposta do agente Creative para que a imagem já venha pronta.
-- [ ] Funcionalidade de download em ZIP real na Fila de Publicação.
-
 ### Fase 2: O Ecossistema de Performance (Ads & Connections)
-- [ ] **Onboarding & Autenticação:** Implementar login real (Firebase ou Supabase) para que cada afiliado tenha sua própria base de dados e tokens separados.
+- [x] **Onboarding & Autenticação:** Login e Onboarding IA concluídos.
 - [ ] **OAuth Social:** Conexões reais com TikTok, Instagram e Google via OAuth2.
 - [ ] **Integração Oficial de Redes:** Publicação e agendamento nativo via APIs das redes.
-- [ ] **Agente Media Buyer (Ads):** Um novo agente capaz de criar campanhas de anúncios (Tráfego Pago) consumindo APIs da Meta e analisando o ROAS/CPA.
+- [ ] **Agente Media Buyer (Ads Real):** Consumir APIs da Meta para criação de campanhas em massa.
 
 ---
 

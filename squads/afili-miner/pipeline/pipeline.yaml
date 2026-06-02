@@ -1,0 +1,20 @@
+pipeline:
+  steps:
+    - id: garimpar_produtos
+      title: Garimpar os 5 melhores produtos do momento
+      file: pipeline/steps/step-01-garimpar-produtos.md
+    - id: analisar_oportunidades
+      title: Pontuar e ranquear oportunidades
+      file: pipeline/steps/step-02-analisar-oportunidades.md
+    - id: checkpoint_aprovacao
+      title: Aprovação do top 3 pelo usuário
+      file: pipeline/steps/step-03-checkpoint-aprovacao.md
+    - id: extrair_dna_pomelli
+      title: Extrair DNA completo da página de vendas
+      file: pipeline/steps/step-04-extrair-dna-pomelli.md
+    - id: briefing_campanha
+      title: Montar briefing de campanha
+      file: pipeline/steps/step-05-briefing-campanha.md
+    - id: card_lalafiliados
+      title: Consolidar card para LALAFILIADOS
+      file: pipeline/steps/step-06-card-lalafiliados.md

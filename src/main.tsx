@@ -1,13 +1,16 @@
+import './index.css';
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
-import './index.css';
 import { SquadProvider } from './context/SquadContext.tsx';
+import { AuthProvider } from './context/AuthContext.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <SquadProvider>
-      <App />
-    </SquadProvider>
+    <AuthProvider>
+      <SquadProvider>
+        <App />
+      </SquadProvider>
+    </AuthProvider>
   </StrictMode>,
 );
